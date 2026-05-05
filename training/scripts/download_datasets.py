@@ -1,28 +1,33 @@
 """
-Dataset Download Script — Automated download of all training datasets.
+Dataset Download Script — Universal Bias Corpus.
 
-Downloads:
-1. SemEval-2020 Task 11 (anchor dataset)
-2. GUS-Net (token-level bias annotations)
-3. LIAR (political fact-checking)
-4. Hyperpartisan News (political bias)
+Automates the fetching of news, social media (Reddit), and political speech
+datasets to create a "Universal" training corpus for the Bias Spotter.
+
+Auto-Downloads:
+- GUS-Net (Token-level bias)
+- LIAR (Fact-checking)
+- BABE (Media bias)
+- GoEmotions (Reddit/Social Media) via HF Datasets API
+
+Manual Downloads (Required):
+- SemEval-2020 Task 11 (Anchor)
+- SemEval-2023 Task 3 (Expansion)
 
 Saves to: training/data/<dataset_name>/
-
-Usage:
-    python download_datasets.py
-    python download_datasets.py --dataset semeval  # download only one
-
-STATUS: Stub — download URLs and structure defined. Will need manual
-download for some datasets (SemEval requires Zenodo access).
 """
 
 from __future__ import annotations
 
 import argparse
 import os
-import sys
+import shutil
+import subprocess
+import zipfile
 from pathlib import Path
+
+import requests
+
 
 # Dataset registry
 DATASETS = {
@@ -51,7 +56,7 @@ DATASETS = {
     "gus_net": {
         "name": "GUS-Net (Bias Annotations)",
         "url": "https://github.com/Ethical-Spectacle/fairly",
-        "description": "69k+ token-level bias annotations across religion, race, gender, politics.",
+        "description": "69k+ token-level bias annotations (religion, race, gender, politics).",
         "manual_download": False,
         "git_clone": "https://github.com/Ethical-Spectacle/fairly.git",
     },
@@ -62,23 +67,19 @@ DATASETS = {
         "manual_download": False,
         "direct_download": "https://www.cs.ucsb.edu/~william/data/liar_dataset.zip",
     },
-    "hyperpartisan": {
-        "name": "Hyperpartisan News",
-        "url": "https://zenodo.org/records/1489920",
-        "description": "Labels articles as hyperpartisan or not.",
-        "manual_download": True,
-        "instructions": (
-            "1. Go to https://zenodo.org/records/1489920\n"
-            "2. Download the dataset\n"
-            "3. Extract to training/data/hyperpartisan/"
-        ),
-    },
     "babe": {
         "name": "BABE (Expert Media Bias)",
         "url": "https://github.com/Media-Bias-Group/MBIC",
-        "description": "3,700+ sentences annotated for media bias by trained experts.",
+        "description": "3,700+ sentences annotated for media bias by experts.",
         "manual_download": False,
         "git_clone": "https://github.com/Media-Bias-Group/MBIC.git",
+    },
+    "goemotions": {
+        "name": "GoEmotions (Social Media)",
+        "url": "https://huggingface.co/datasets/google-research-datasets/go_emotions",
+        "description": "58k Reddit comments with 27 emotion labels (Signal for Loaded Language).",
+        "manual_download": False,
+        "hf_dataset": "google-research-datasets/go_emotions",
     },
 }
 
@@ -90,33 +91,37 @@ def ensure_data_dir() -> Path:
     return data_dir
 
 
-def print_download_instructions() -> None:
-    """Print download instructions for all datasets."""
-    print("=" * 70)
-    print("DATASET DOWNLOAD INSTRUCTIONS")
-    print("=" * 70)
+def download_file(url: str, dest: Path) -> None:
+    """Download a file with a progress indicator."""
+    print(f"Downloading {url}...")
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(dest, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
 
-    for key, info in DATASETS.items():
-        print(f"\n{'─' * 50}")
-        print(f"📦 {info['name']}")
-        print(f"   URL: {info['url']}")
-        print(f"   Description: {info['description']}")
 
-        if info.get("manual_download"):
-            print(f"   ⚠️  MANUAL DOWNLOAD REQUIRED:")
-            print(f"   {info['instructions']}")
-        elif info.get("git_clone"):
-            print(f"   ✅ Can be auto-downloaded via git clone")
-        elif info.get("direct_download"):
-            print(f"   ✅ Can be auto-downloaded")
+def git_clone(url: str, dest: Path) -> None:
+    """Clone a git repository."""
+    if dest.exists():
+        print(f"Directory {dest} already exists. Skipping clone.")
+        return
+    print(f"Cloning {url} into {dest}...")
+    subprocess.run(["git", "clone", "--depth", "1", url, str(dest)], check=True)
 
-    print(f"\n{'=' * 70}")
-    print("Save all datasets to: training/data/<dataset_name>/")
-    print("=" * 70)
+
+def hf_download(dataset_name: str, dest: Path) -> None:
+    """Download a dataset via the HuggingFace Datasets API."""
+    from datasets import load_dataset
+
+    print(f"Fetching HF dataset {dataset_name}...")
+    ds = load_dataset(dataset_name)
+    ds.save_to_disk(str(dest))
+    print(f"Saved to {dest}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download training datasets")
+    parser = argparse.ArgumentParser(description="Universal Bias Corpus Downloader")
     parser.add_argument(
         "--dataset",
         choices=list(DATASETS.keys()) + ["all"],
@@ -130,16 +135,49 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    data_dir = ensure_data_dir()
+
     if args.list:
-        print_download_instructions()
+        print("=" * 70)
+        for key, info in DATASETS.items():
+            print(f"{key:15} | {info['name']}")
         return
 
-    data_dir = ensure_data_dir()
-    print(f"Data directory: {data_dir}")
+    to_download = DATASETS.keys() if args.dataset == "all" else [args.dataset]
 
-    # TODO: Implement actual downloads for auto-downloadable datasets
-    # For now, print instructions
-    print_download_instructions()
+    for key in to_download:
+        info = DATASETS[key]
+        dest = data_dir / key
+
+        print(f"\n📦 Processing: {info['name']}")
+
+        if info.get("manual_download"):
+            if not dest.exists():
+                print(f"   ⚠️  MANUAL DOWNLOAD REQUIRED:")
+                print(f"   {info['instructions']}")
+            else:
+                print(f"   ✅ Manual directory found at {dest}")
+            continue
+
+        try:
+            if "git_clone" in info:
+                git_clone(info["git_clone"], dest)
+            elif "direct_download" in info:
+                zip_path = data_dir / f"{key}.zip"
+                download_file(info["direct_download"], zip_path)
+                print(f"Extracting {zip_path}...")
+                with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                    zip_ref.extractall(dest)
+                zip_path.unlink()
+            elif "hf_dataset" in info:
+                hf_download(info["hf_dataset"], dest)
+        except Exception as e:
+            print(f"   ❌ Error processing {key}: {e}")
+
+    print("\n" + "=" * 70)
+    print("Download process complete.")
+    print(f"Data location: {data_dir.absolute()}")
+    print("=" * 70)
 
 
 if __name__ == "__main__":

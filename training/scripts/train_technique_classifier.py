@@ -21,18 +21,18 @@ from pathlib import Path
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Train the technique classification model"
+        description="Train the universal technique classification model"
     )
     parser.add_argument(
         "--model",
         type=str,
-        default="microsoft/deberta-v3-base",
+        default="answerdotai/ModernBERT-large",
         help="Pretrained model name or path",
     )
-    parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--batch-size", type=int, default=16)
-    parser.add_argument("--learning-rate", type=float, default=2e-5)
-    parser.add_argument("--focal-loss", action="store_true", help="Use focal loss for class imbalance")
+    parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--learning-rate", type=float, default=1e-5)
+    parser.add_argument("--focal-loss", action="store_true", default=True, help="Use focal loss for class imbalance")
     parser.add_argument(
         "--data-dir",
         type=str,

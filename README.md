@@ -1,25 +1,25 @@
-# Cognitive Bias Spotter
+# 🔍 Cognitive Bias Spotter
 
-A persuasion technique detection system built around a fine-tuned BERT/RoBERTa classifier — **not** an LLM wrapper. Designed to be a standalone app and document reader first, with a browser extension as an optional later layer.
+An end-to-end pipeline for detecting persuasion techniques and cognitive biases across **News, Social Media, and Political Rhetoric**.
 
-## What It Does
+Unlike simple GPT-wrappers, this system uses a fine-tuned **ModernBERT-large** model (8k context) to identify 14 specific manipulation techniques defined by the SemEval-2020/2023 research tasks.
 
-Paste or upload text (news articles, political speeches, ad copy, PDFs, documents) and get:
-- **Color-coded annotations** of every persuasion technique detected
-- **Manipulation density score** calibrated against a reference corpus
-- **Percentile ranking** showing how manipulative the text is compared to a reference corpus
-- **Category breakdown** (emotional, statistical, framing, social, logical)
+### 🚀 Key Features
+- **ModernBERT-large Architecture:** Optimized for long-range dependencies (detects repetition and whataboutism across 8,000 tokens).
+- **Universal Scope:** Trained on a unified corpus of news, Reddit (GoEmotions), and political speeches.
+- **3-Layer Pipeline:** High-speed Lexicon Matcher → Fine-tuned ML Classifier → LLM Reasoning (for edge cases).
+- **Research-Grade:** Implements Focal Loss to handle class imbalance (common vs. rare techniques).
 
 ## Architecture — 3 Layers
 
 ```
-Input Text
+Input Text (up to 8k tokens)
     ↓
 Layer 1: Lexicon Matching (~50ms, $0)
     • Curated regex patterns for obvious manipulation
     ↓
-Layer 2: Fine-Tuned Classifier (~100-300ms, $0)
-    • DeBERTa-v3 / RoBERTa trained on SemEval-2020 Task 11
+Layer 2: ML Classifier (ModernBERT-large, ~200-500ms, $0)
+    • Trained on News + Social + Politics unified corpus
     • Span identification + technique classification
     ↓
 Layer 3: LLM Reasoning (selective, low cost)
@@ -39,7 +39,7 @@ Aggregator + Scorer
 | Logical | Black-and-White Fallacy, Causal Oversimplification, Whataboutism |
 | Framing | Exaggeration/Minimization, Doubt, Flag-Waving |
 | Rhetorical | Slogans, Repetition, Thought-Terminating Clichés |
-| Urgency | False Scarcity, FOMO, Identity Bait |
+| Universal | False Scarcity, FOMO, Identity Bait |
 
 ## Project Structure
 
@@ -105,14 +105,14 @@ pytest tests/
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 1 | Data & Setup | 🔧 In Progress |
-| 2 | Baseline Classifier (DeBERTa-v3-base) | ⏳ |
-| 3 | Production Model + Span ID | ⏳ |
-| 4 | Lexicon (Layer 1) | ⏳ |
+| 1 | Data & Setup (Universal Corpus) | 🔧 In Progress |
+| 2 | Baseline Classifier (ModernBERT-base) | ⏳ |
+| 3 | Production Model (ModernBERT-large) | ⏳ |
+| 4 | Lexicon (Layer 1) | ✅ |
 | 5 | LLM Layer (Layer 3) | ⏳ |
-| 6 | Aggregator & Scoring | ⏳ |
-| 7 | Document Parser | ⏳ |
-| 8 | Backend API | ⏳ |
+| 6 | Aggregator & Scoring | ✅ |
+| 7 | Document Parser (TXT/MD) | ✅ |
+| 8 | Backend API (Stubs) | ✅ |
 | 9 | Frontend (Standalone App) | ⏳ |
 | 10 | Browser Extension | ⏳ |
 

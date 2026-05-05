@@ -198,3 +198,27 @@ For the density score breakdown, techniques are grouped into meta-categories:
 | **Logical** | Black-and-White Fallacy, Causal Oversimplification, Whataboutism/Straw Man/Red Herring |
 | **Framing** | Exaggeration/Minimization, Doubt, False Scarcity, Missing Comparisons |
 | **Rhetorical** | Slogans, Repetition, Thought-Terminating Clichés |
+
+---
+
+## Universal Dataset Mapping (Cross-Domain)
+
+To expand beyond news, we map external datasets into our canonical 14 categories:
+
+### A. Social Media (GoEmotions - Reddit)
+Reddit emotions are mapped as signals for specific techniques:
+- **Anger, Fear, Disgust, Sadness** → Signal for **Loaded Language** and **Appeal to Fear**.
+- **Admiration, Pride** → Signal for **Flag-Waving**.
+- **Disapproval** → Signal for **Doubt** and **Name Calling**.
+
+### B. Political Discourse (Vox / Speeches)
+Formal rhetoric often uses specific structural techniques:
+- **Whataboutism** is significantly more common in political debates.
+- **Thought-Terminating Clichés** are used to end difficult lines of questioning.
+- **Identity Bait** ("The common people") is the primary driver of political polarization.
+
+### C. Conversational Bias (GUS-Net)
+Token-level bias annotations (religion, race, gender) are mapped to:
+- **Identity Bait**
+- **Name Calling / Labeling**
+- **Doubt** (bias via questioning credibility based on identity)
