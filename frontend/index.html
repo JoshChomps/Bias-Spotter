@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Bias Spotter</title>
+    <meta name="description" content="Detect persuasion techniques in text using AI-powered analysis.">
+    <style>
+        /* Minimal MVP styles — will be replaced with a proper frontend in Phase 9 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #888;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        textarea:focus { border-color: #6366f1; }
+        button {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #results {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #1a1a2e;
+            border-radius: 12px;
+            border: 1px solid #2a2a4a;
+            display: none;
+        }
+        #results.visible { display: block; }
+        .score {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .score-label {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .error {
+            color: #ef4444;
+            padding: 1rem;
+            background: #1a1a2e;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .status { color: #888; font-style: italic; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Cognitive Bias Spotter</h1>
+        <p class="subtitle">
+            Paste text below to analyze for persuasion techniques.
+            Powered by a fine-tuned ML classifier — not a GPT wrapper.
+        </p>
+
+        <textarea id="input-text" placeholder="Paste an article, speech, or ad copy here..."></textarea>
+
+        <button id="analyze-btn" onclick="analyzeText()">Analyze Text</button>
+
+        <div id="status" class="status"></div>
+
+        <div id="results">
+            <div class="score-label">Manipulation Density Score</div>
+            <div class="score" id="density-score">—</div>
+            <div id="techniques-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        async function analyzeText() {
+            const text = document.getElementById('input-text').value.trim();
+            if (!text) return;
+
+            const btn = document.getElementById('analyze-btn');
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+
+            btn.disabled = true;
+            status.textContent = 'Analyzing...';
+            results.classList.remove('visible');
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze/text`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, deep_analysis: false }),
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Analysis failed');
+                }
+
+                const data = await response.json();
+                displayResults(data);
+                status.textContent = '';
+            } catch (error) {
+                status.innerHTML = `<div class="error">⚠️ ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const results = document.getElementById('results');
+            const score = document.getElementById('density-score');
+            const list = document.getElementById('techniques-list');
+
+            score.textContent = data.density_score.toFixed(1);
+            score.style.color = getScoreColor(data.density_score);
+
+            // Display detected techniques
+            if (data.techniques.length === 0) {
+                list.innerHTML = '<p style="color:#888">No persuasion techniques detected.</p>';
+            } else {
+                list.innerHTML = data.techniques.map(t => `
+                    <div style="padding:0.5rem 0;border-bottom:1px solid #2a2a4a;">
+                        <strong style="color:${getCategoryColor(t.category)}">${t.technique}</strong>
+                        <span style="color:#666;font-size:0.8rem;margin-left:0.5rem">[${t.source_layer}]</span>
+                        <br>
+                        <span style="color:#aaa;font-size:0.9rem">"${t.text_span}"</span>
+                        <br>
+                        <span style="color:#666;font-size:0.85rem">${t.explanation}</span>
+                    </div>
+                `).join('');
+            }
+
+            results.classList.add('visible');
+        }
+
+        function getScoreColor(score) {
+            if (score < 20) return '#22c55e';
+            if (score < 50) return '#eab308';
+            if (score < 75) return '#f97316';
+            return '#ef4444';
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                emotional: '#ef4444',
+                social: '#3b82f6',
+                logical: '#a855f7',
+                framing: '#f97316',
+                rhetorical: '#22c55e',
+            };
+            return colors[category] || '#888';
+        }
+    </script>
+</body>
+</html>

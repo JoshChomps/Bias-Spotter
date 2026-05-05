@@ -1,0 +1,155 @@
+# Cognitive Bias Spotter — Lexicon
+# Curated regex patterns for Layer 1 (fast, local matching)
+#
+# Each technique has:
+#   - patterns: list of regex strings (case-insensitive matching)
+#   - category: meta-category for density breakdown
+#   - description: explanation shown to users on hover
+#
+# IMPORTANT: Spend real time curating these patterns. Quality here determines
+# a large chunk of the system's real-world performance.
+
+loaded_language:
+  category: emotional
+  description: "Emotionally charged words or phrases designed to influence beyond rational argument."
+  patterns:
+    - "\\b(brutal|horrific|devastating|catastrophic|outrageous)\\b"
+    - "\\b(radical|extremist|militant|fanatical)\\b"
+    - "\\b(taxpayer-funded|government-run|bureaucratic)\\b"
+    - "\\b(freedom-loving|patriotic|god-fearing)\\b"
+    - "\\b(un-American|anti-American|treasonous)\\b"
+    - "\\b(corrupt|crooked|rigged|stolen)\\b"
+    - "\\b(invasion|onslaught|assault)\\s+(of|on|against)\\b"
+
+name_calling:
+  category: emotional
+  description: "Attaching a negative label to dismiss a person, group, or idea without examining evidence."
+  patterns:
+    - "\\b(snowflake|libtard|deplorable|bigot|fascist|communist|socialist)s?\\b"
+    - "\\b(conspiracy\\s+theorist|science\\s+denier|flat\\s+earther)s?\\b"
+    - "\\b(radical\\s+left|far\\s+right|extremist)s?\\b"
+    - "\\b(elitist|globalist|establishment)s?\\b"
+    - "\\b(fake\\s+news|propaganda\\s+machine|state\\s+media)\\b"
+
+appeal_to_fear:
+  category: emotional
+  description: "Building support by instilling anxiety, dread, or panic."
+  patterns:
+    - "\\bif we don'?t act (now|immediately|fast|quickly)\\b"
+    - "\\b(threat|danger|crisis|emergency|catastrophe)\\s+(to|for|facing)\\b"
+    - "\\b(our children|future generations) will (suffer|pay|bear)\\b"
+    - "\\b(coming for|taking away|destroying) (your|our)\\b"
+    - "\\b(the end of|death of|destruction of)\\b"
+    - "\\b(wake up|open your eyes|before it'?s too late)\\b"
+
+appeal_to_authority:
+  category: social
+  description: "Using an authority figure's opinion as evidence, especially when irrelevant to the topic."
+  patterns:
+    - "\\b(studies|research|science) (shows?|proves?|confirms?|demonstrates?)\\b"
+    - "\\b(experts?|scientists?|doctors?|professors?) (say|agree|recommend|warn|believe)\\b"
+    - "\\b(according to|as stated by|endorsed by) (leading|top|renowned|eminent)\\b"
+    - "\\b(Nobel|award-winning|prestigious)\\s+(laureate|winner|scientist|researcher)\\b"
+    - "\\b(everyone knows|it'?s well.?known|it'?s been proven)\\b"
+
+bandwagon:
+  category: social
+  description: "Appealing to popularity or crowd behavior to legitimize a position."
+  patterns:
+    - "\\b(millions?|thousands?|hundreds? of thousands?)\\s+(of people|of (users|customers|Americans))\\s+(have|use|trust|agree|believe|support)\\b"
+    - "\\b(everyone|everybody|most people|the majority)\\s+(is|knows?|agrees?|wants?|supports?)\\b"
+    - "\\b(can'?t be wrong|can'?t all be wrong)\\b"
+    - "\\bjoin (the|millions?|thousands?)\\b"
+    - "\\b(growing movement|growing number|wave of support)\\b"
+    - "\\bdon'?t be left behind\\b"
+
+false_scarcity:
+  category: framing
+  description: "Manufactured urgency or scarcity to bypass deliberation."
+  patterns:
+    - "\\b(limited time|limited offer|limited availability|limited quantities)\\b"
+    - "\\bonly \\d+\\s*(left|remaining|available|spots?)\\b"
+    - "\\b(while supplies last|until stocks? (runs?|last))\\b"
+    - "\\b(act (now|fast|quickly|immediately)|don'?t (wait|miss|delay|hesitate))\\b"
+    - "\\b(expires?|ending) (soon|today|tomorrow|tonight)\\b"
+    - "\\b(last chance|final opportunity|now or never)\\b"
+    - "\\b(before (it'?s|they'?re) gone|going fast|selling out)\\b"
+
+doubt:
+  category: framing
+  description: "Questioning credibility without providing evidence."
+  patterns:
+    - "\\b(some|many|numerous) (experts?|people|critics?)\\s+(disagree|question|doubt|dispute)\\b"
+    - "\\b(can we really trust|should we really believe|how can we trust)\\b"
+    - "\\b(their|his|her) (motives?|intentions?|agenda) (are|is|remain) (questionable|unclear|suspect)\\b"
+    - "\\b(so-?called|self-?proclaimed|alleged)\\b"
+    - "\\b(remains? to be seen|jury is still out|far from settled)\\b"
+
+exaggeration:
+  category: framing
+  description: "Overstating or understating to distort perception."
+  patterns:
+    - "\\b(the (greatest|worst|biggest|most dangerous|most important) .{0,30} (ever|in history|of all time|of our time))\\b"
+    - "\\b(never before|unprecedented|unheard of|like nothing we'?ve (ever )?seen)\\b"
+    - "\\b(just|merely|only|simply) a (minor|small|little|tiny)\\b"
+    - "\\b(absolutely|completely|totally|utterly|entirely) (destroyed|ruined|devastated|failed)\\b"
+    - "\\b(literally|actually) (the worst|the best|destroying|killing|saving)\\b"
+
+slogans:
+  category: rhetorical
+  description: "Brief, striking phrases provoking emotional reaction rather than reasoned response."
+  patterns:
+    - "\\b(make \\w+ great again)\\b"
+    - "\\b(yes we can|stronger together|build (the|that) wall)\\b"
+    - "\\b(lock (her|him|them) up|drain the swamp)\\b"
+    - "\\b(no justice,? no peace|power to the people)\\b"
+    - "\\b(we shall overcome|never again|never forget)\\b"
+
+black_and_white:
+  category: logical
+  description: "Presenting only two options when more exist, forcing a false binary choice."
+  patterns:
+    - "\\b(you'?re either .{2,40} or .{2,40})\\b"
+    - "\\b(if you'?re not .{2,40},? you'?re .{2,40})\\b"
+    - "\\b(the only (option|choice|way|solution) is)\\b"
+    - "\\b(there (are|is) (only )?two (choices?|options?|ways?|sides?))\\b"
+    - "\\b(with us or against us)\\b"
+
+thought_terminating_cliches:
+  category: rhetorical
+  description: "Common phrases that discourage critical thinking and end debate."
+  patterns:
+    - "\\b(it is what it is|that'?s just (the way|how) it (is|works))\\b"
+    - "\\b(everything happens for a reason|god works in mysterious ways)\\b"
+    - "\\b(end of (story|discussion|debate)|period|full stop|case closed)\\b"
+    - "\\b(agree to disagree|let'?s move on|nothing to see here)\\b"
+    - "\\b(that'?s just (your|my|their) opinion|who are (you|we) to judge)\\b"
+    - "\\b(don'?t (overthink|question|rock the boat))\\b"
+
+flag_waving:
+  category: emotional
+  description: "Appealing to patriotism or national identity to justify a position."
+  patterns:
+    - "\\b(as (true|real|proud|patriotic) Americans?)\\b"
+    - "\\b(our (great|beloved|beautiful) (nation|country|land))\\b"
+    - "\\b(for the (sake|good|future) of (our|this) (country|nation))\\b"
+    - "\\b(founding fathers|constitution|bill of rights)\\s+(intended|wanted|would)\\b"
+    - "\\b(God bless (America|this country|our troops))\\b"
+
+identity_bait:
+  category: social
+  description: "Weaponizing group identity to create in-group/out-group dynamics."
+  patterns:
+    - "\\b(real|true|proud) (Americans?|patriots?|Christians?|believers?)\\b"
+    - "\\b(people like (us|you|them)|our kind|their kind)\\b"
+    - "\\b(the (silent|moral) majority|ordinary (people|citizens|folks))\\b"
+    - "\\b(elites?|coastal elites?|ivory tower|out of touch)\\b"
+
+fomo:
+  category: framing
+  description: "Fear of missing out — social pressure to act immediately."
+  patterns:
+    - "\\b(don'?t miss (out|this)|you'?ll (regret|miss) (it|this))\\b"
+    - "\\b(everyone (else )?is (already|doing)|you'?re (falling|being left) behind)\\b"
+    - "\\b(trending|viral|everyone'?s talking about)\\b"
+    - "\\b(get (in|on board) (before|while)|be (one of )?the first)\\b"
