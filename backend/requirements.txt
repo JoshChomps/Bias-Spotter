@@ -1,0 +1,17 @@
+# Cognitive Bias Spotter — Core Dependencies
+# Install with: pip install -r requirements.txt
+
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+transformers>=4.45.0
+datasets>=3.0.0
+torch>=2.2.0
+scikit-learn>=1.5.0
+spacy>=3.7.0
+pypdf>=4.0.0
+python-docx>=1.1.0
+pyyaml>=6.0.0
+beautifulsoup4>=4.12.0
+pdfplumber>=0.11.0
+huggingface-hub>=0.25.0
+python-multipart>=0.0.9

@@ -85,9 +85,14 @@ Aggregator + Scorer
 ## Quick Start
 
 ```bash
-# Install dependencies
+# Create and activate virtual environment
 cd backend
-uv sync
+python -m venv .venv
+.venv\Scripts\activate      # Windows
+# source .venv/bin/activate  # macOS/Linux
+
+# Install dependencies
+pip install -r requirements-dev.txt
 
 # Run the API
 uvicorn app.main:app --reload

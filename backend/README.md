@@ -5,11 +5,13 @@ FastAPI-based analysis pipeline for detecting persuasion techniques in text.
 ## Setup
 
 ```bash
-# Using uv (recommended)
-uv sync
+# Create and activate a virtual environment
+python -m venv .venv
+.venv\Scripts\activate      # Windows
+# source .venv/bin/activate  # macOS/Linux
 
-# Or pip
-pip install -e ".[dev]"
+# Install core + dev dependencies
+pip install -r requirements-dev.txt
 ```
 
 ## Running
